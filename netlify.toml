@@ -1,28 +1,26 @@
 # netlify.toml
 
-# Tell Netlify to use Docker to build and deploy this site.
+# For deploying a Docker container with a Dockerfile in the root of your repository:
+# 1. Ensure your Netlify site's "Build & deploy" settings (in the Netlify UI)
+#    are configured to use Docker. Look for an option like "Deploy with Docker"
+#    or "Build with Docker image".
+# 2. Netlify should then automatically detect and use your Dockerfile.
+#    The CMD instruction in your Dockerfile will be used to run your application.
+#    The EXPOSE instruction in your Dockerfile tells Netlify which port your application listens on.
+
+# The [build] section can often be omitted when Netlify is correctly configured
+# for Dockerfile-based deploys via its UI, as it will use the Dockerfile directly.
+# If you include it, keep it minimal.
 [build]
-  # This tells Netlify to look for a Dockerfile and use it.
-  # Netlify will build the Docker image and deploy it.
-  # No specific 'command' is needed here if the Dockerfile has a CMD.
-  # publish directory is not relevant for a Docker deployment in this manner.
+  # No explicit 'command' or 'publish' directory is typically needed here,
+  # as these are handled by the Dockerfile and container runtime.
+  # If Netlify's build system attempts to run other build tools (e.g., for Python or Node)
+  # despite the presence of a Dockerfile, it usually means the Netlify UI setting
+  # for Docker deployment is not active or is being overridden.
 
-# Settings for the deployed service.
-# Netlify automatically detects the port exposed by the Docker container (via EXPOSE in Dockerfile).
-# However, if explicit configuration is needed or for clarity:
+# The [dev] block is for the `netlify dev` command for local development emulation.
+# It does not directly affect how Netlify builds or deploys your Docker container in the cloud.
 [dev]
-  framework = "#custom" # Using custom framework since it's Docker
-  # The command to start your app for local dev, not directly used for Docker deployment by Netlify
-  # but can be useful for `netlify dev`
-  # command = "docker compose up" # Example if you had a docker-compose for local dev
-  # targetPort = 8080 # The port your app runs on inside the container
-
-# It's important to note that for Docker deployments on Netlify,
-# most of the configuration (like start command) comes from the Dockerfile itself.
-# Environment variables must be set in the Netlify UI under site settings.
-
-# If your Docker container listens on a port other than 80, Netlify should detect it
-# from the EXPOSE instruction in your Dockerfile.
-# If a specific port needs to be mapped or if there are issues,
-# further Netlify-specific Docker settings might be required,
-# but this basic toml is the starting point for Dockerfile-based deploys.
+  # framework = "#custom" # Let Netlify auto-detect or set this if `netlify dev` is used.
+  # Setting a targetPort can be helpful for `netlify dev` to proxy to your running container.
+  # targetPort = 8080 # Assuming your app in Docker runs on port 8080.

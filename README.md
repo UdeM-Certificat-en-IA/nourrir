@@ -211,6 +211,31 @@ Netlify can deploy services from a Docker container.
 6.  **Access Your Application**:
     *   Once deployed, Netlify will provide you with a URL (e.g., `your-site-name.netlify.app`).
 
+#### Troubleshooting Netlify Docker Deployment
+
+If your Netlify deployment results in a 404 error or the deploy logs indicate that Netlify is attempting a language-specific build (e.g., installing Python dependencies directly) instead of using your Dockerfile:
+
+1.  **Check Netlify UI Build Settings**:
+    *   Go to your site in the Netlify dashboard.
+    *   Navigate to **Site configuration** (or **Site settings**) > **Build & deploy**.
+    *   Under "Build settings," ensure that your site is configured to **Deploy with Docker** (or a similar option indicating Docker image deployment). If it's set to a specific language (like "Python") or "None" with build commands, Netlify might ignore the Dockerfile.
+    *   The presence of files like `requirements.txt` (for Python), `package.json` (for Node.js), etc., can cause Netlify's build system to auto-select a language-specific build process if Docker is not explicitly selected as the deployment method in the UI.
+
+2.  **`netlify.toml` Configuration**:
+    *   The `netlify.toml` file in this repository is configured to be minimal for Docker deployments, relying on Netlify's Dockerfile detection once Docker is enabled in the UI.
+    *   Ensure your `netlify.toml` doesn't contain conflicting build commands that might override Docker deployment settings.
+
+3.  **Review Deploy Logs**:
+    *   Carefully examine the deploy logs in the Netlify dashboard.
+    *   Look for lines indicating whether Netlify is trying to build a Docker image (e.g., `docker build ...`) or if it's running commands for a specific language runtime (e.g., `pip install ...`, `npm install ...`).
+    *   If it's not building with Docker, the UI settings are the most likely cause.
+
+4.  **Dockerfile Instructions**:
+    *   Ensure your `Dockerfile` correctly `EXPOSE`s the port your application listens on (e.g., `EXPOSE 8080`). Netlify uses this to route requests to your container.
+    *   Ensure your `Dockerfile`'s `CMD` or `ENTRYPOINT` instruction correctly starts your application server (e.g., Gunicorn).
+
+If issues persist, consult the official [Netlify documentation on Docker deployments](https://docs.netlify.com/configure-builds/docker-deploys/) for the most current guidance.
+
 **Important Considerations for Both Platforms**:
 *   **Ollama Service**: This application requires access to an Ollama instance. Ensure the `OLLAMA_CHAT_URL` and `OLLAMA_MODELS_URL` environment variables point to a running and accessible Ollama service.
 *   **Resource Allocation**: Depending on the traffic and resource needs of the Ollama models, you might need to choose appropriate service plans on Render or Netlify (if their container service has different tiers) to ensure smooth operation.
