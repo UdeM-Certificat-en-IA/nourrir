@@ -15,6 +15,9 @@ NourrIR is a minimal Flask-based web application showcasing static pages and an 
 - [Usage](#usage)
 - [Project Structure](#project-structure)
 - [Troubleshooting](#troubleshooting)
+- [Deployment](#deployment)
+  - [Render.com Deployment](#rendercom-deployment)
+  - [Netlify Deployment (via Docker)](#netlify-deployment-via-docker)
 - [License](#license)
 
 ## Features
@@ -151,6 +154,67 @@ By default, the web service is exposed on port `8282`.
 - **Cannot connect to Ollama**: Verify `OLLAMA_CHAT_URL` (or legacy `OLLAMA_URL`) and that the Ollama server is reachable from your network.
 - **Port conflicts**: Ensure ports `8080` (Flask) or `8282` (Docker) are available.
 - **Asset loading issues**: Check the `/assets/<filename>` route and that files exist under `static/assets/`.
+
+## Deployment
+
+This application is configured for deployment on Render and Netlify.
+
+### Render.com Deployment
+
+1.  **Sign up or Log in** to [Render.com](https://render.com/).
+2.  **Create a New Web Service**:
+    *   Connect your Git repository where this project is hosted.
+    *   Render will automatically detect the `render.yaml` file. Review the settings it populates.
+    *   Alternatively, you can manually set up the service:
+        *   **Environment**: Docker
+        *   **Repository**: Your Git repo URL
+        *   **Branch**: Your desired deployment branch (e.g., `main`)
+        *   **Dockerfile Path**: `./Dockerfile` (if not automatically detected)
+        *   **Instance Type**: Choose an appropriate plan (e.g., Free, Standard). The `render.yaml` defaults to `free`.
+3.  **Environment Variables**:
+    *   Navigate to your service's "Environment" settings on Render.
+    *   Add the following essential environment variables:
+        *   `OLLAMA_CHAT_URL`: The URL for your Ollama chat completions API endpoint.
+        *   `OLLAMA_MODELS_URL`: The URL for your Ollama models listing API endpoint.
+        *   `OLLAMA_MODEL` (Optional): The default Ollama model you wish to use (e.g., `mistral:latest`). If not set, the application's default will be used.
+        *   `PORT`: Should be `8080` (as defined in `Dockerfile` and `render.yaml`). Render usually sets this automatically based on Docker EXPOSE or `render.yaml`.
+        *   `PYTHON_VERSION`: Should be `3.11` (Render might infer this from the Docker base image).
+    *   Ensure these variables are saved. `OLLAMA_CHAT_URL` and `OLLAMA_MODELS_URL` are marked with `sync: false` in `render.yaml`, meaning they *must* be set in the dashboard.
+4.  **Deploy**:
+    *   Trigger a manual deploy or rely on auto-deploys if configured.
+    *   Monitor the deployment logs for any issues.
+5.  **Access Your Application**:
+    *   Once deployed, Render will provide you with a URL (e.g., `your-app-name.onrender.com`).
+
+### Netlify Deployment (via Docker)
+
+Netlify can deploy services from a Docker container.
+
+1.  **Sign up or Log in** to [Netlify.com](https://netlify.com/).
+2.  **Create a New Site**:
+    *   Import an existing project.
+    *   Connect to your Git provider and select your repository.
+3.  **Build Settings**:
+    *   Netlify should detect the `netlify.toml` file. This file tells Netlify to use the `Dockerfile` for deployment.
+    *   Ensure the correct repository and branch are selected.
+    *   Netlify will build the Docker image from your `Dockerfile` and deploy it. The `EXPOSE 8080` instruction in your `Dockerfile` tells Netlify which port your application is listening on.
+4.  **Environment Variables**:
+    *   Go to **Site settings > Build & deploy > Environment**.
+    *   Add the following essential environment variables:
+        *   `OLLAMA_CHAT_URL`: The URL for your Ollama chat completions API endpoint.
+        *   `OLLAMA_MODELS_URL`: The URL for your Ollama models listing API endpoint.
+        *   `OLLAMA_MODEL` (Optional): The default Ollama model you wish to use (e.g., `mistral:latest`).
+    *   **Note**: Unlike some platforms, you don't typically need to set `PORT` as an environment variable in Netlify for Docker deployments if `EXPOSE` is used correctly in the Dockerfile. Netlify handles port mapping.
+5.  **Deploy Site**:
+    *   Trigger a deploy.
+    *   Monitor the deploy logs in the Netlify dashboard.
+6.  **Access Your Application**:
+    *   Once deployed, Netlify will provide you with a URL (e.g., `your-site-name.netlify.app`).
+
+**Important Considerations for Both Platforms**:
+*   **Ollama Service**: This application requires access to an Ollama instance. Ensure the `OLLAMA_CHAT_URL` and `OLLAMA_MODELS_URL` environment variables point to a running and accessible Ollama service.
+*   **Resource Allocation**: Depending on the traffic and resource needs of the Ollama models, you might need to choose appropriate service plans on Render or Netlify (if their container service has different tiers) to ensure smooth operation.
+*   **Logging**: Check the application logs on Render or Netlify to diagnose any issues post-deployment. The application is configured to log to standard output.
 
 ## License
 

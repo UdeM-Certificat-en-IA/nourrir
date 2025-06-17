@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: nourrir-flask-app
+    env: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free # Or your desired plan, e.g., standard
+    healthCheckPath: /
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11" # Ensure this matches the Dockerfile base image if Render needs it explicitly
+      - key: PORT
+        value: "8080" # Port Gunicorn listens on (defined in Dockerfile CMD)
+      - key: OLLAMA_CHAT_URL
+        sync: false # Mark as external, to be set in Render dashboard
+      - key: OLLAMA_MODELS_URL
+        sync: false # Mark as external, to be set in Render dashboard
+      - key: OLLAMA_MODEL
+        sync: false # Optional: if you want to override the default model in app.py
+      # Add any other necessary environment variables here
+      # For example, if Flask's DEBUG mode should be off in production:
+      # - key: FLASK_DEBUG
+      #   value: "0"
